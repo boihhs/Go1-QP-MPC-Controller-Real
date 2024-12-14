@@ -38,7 +38,7 @@
 #include "Go1Params.h"
 #include "Go1ControlStates.h"
 #include "Go1RobotControl.h"
-#include "Go1BasicEKF.h"
+#include "Go1FilterEKF.h"
 #include "legKinematics/Go1Kinematics.h"
 #include "utils/Utils.h"
 
