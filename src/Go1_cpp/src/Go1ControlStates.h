@@ -10,7 +10,7 @@
 #include <Eigen/Dense>
 #include <ros/ros.h>
 
-#include "Go1Parameters.h"
+#include "Go1Params.h"
 
 class Go1ControlStates {
 public:
