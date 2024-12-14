@@ -1,0 +1,44 @@
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+
+build
+devel
+logs
+src/a1_cpp/cmake-build-debug
+.catkin_tools
+.idea
+.vscode
+src/a1_cpp/cmake-build-debug-remote/
+
+src/a1_cpp/src/mpc_osqp.cc
