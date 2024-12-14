@@ -65,7 +65,7 @@
 #include <std_msgs/Char.h>
 
 // control parameters
-#include "Go1Parameters.h"
+#include "Go1Params.h"
 #include "Go1ControlStates.h"
 #include "Go1RobotControl.h"
 #include "Go1FilterEKF.h"
