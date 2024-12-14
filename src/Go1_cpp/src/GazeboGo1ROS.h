@@ -154,7 +154,7 @@ private:
     // variables related to control
     Go1ControlStates go1_ctrl_states;
     Go1RobotControl _root_control;
-    Go1BasicEKF go1_estimate;
+    Go1FilterEKF go1_estimate;
 
     // filters
     MovingWindowFilter acc_x;
