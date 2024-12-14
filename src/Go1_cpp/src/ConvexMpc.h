@@ -16,8 +16,8 @@
 #include <Eigen/Eigenvalues>
 #include <unsupported/Eigen/MatrixFunctions>
 
+#include "Go1ControlStates.h"
 #include "Go1Params.h"
-#include "Go1Parameters.h"
 #include "utils/Utils.h"
 
 class ConvexMpc {
