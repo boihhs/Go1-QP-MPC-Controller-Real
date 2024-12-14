@@ -10,7 +10,7 @@
 #include <vector>
 #include <Eigen/Dense>
 
-#include "../Go1Parameters.h"
+#include "../Go1Params.h"
 
 class Utils {
 public:
