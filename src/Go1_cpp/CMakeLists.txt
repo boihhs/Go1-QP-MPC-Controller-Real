@@ -56,8 +56,8 @@ add_library(go1_lib
         src/utils/Utils.h
         src/Go1RobotControl.cpp
         src/Go1RobotControl.h
-        src/Go1BasicEKF.cpp
-        src/Go1BasicEKF.h
+        src/Go1FilterEKF.cpp
+        src/Go1FilterEKF.h
         src/ConvexMpc.cpp
         src/ConvexMpc.h
         )
@@ -92,29 +92,4 @@ target_link_libraries(hardware_go1_ctrl
         hardware_go1_lib
         ${catkin_LIBRARIES}
         OsqpEigen::OsqpEigen
-        )
-
-# tests
-# Declare a cpp executable
-
-add_executable(test_rotation src/test/test_rotation.cpp
-        src/utils/Utils.cpp
-        src/utils/Utils.h
-        )
-
-add_executable(test_bezier src/test/test_bezier.cpp
-        src/utils/Utils.cpp
-        src/utils/Utils.h
-        )
-
-add_executable(test_mpc src/test/test_mpc.cpp)
-target_link_libraries(test_mpc
-        go1_lib
-        ${catkin_LIBRARIES}
-        OsqpEigen::OsqpEigen
-        )
-
-add_executable(test_unitree_legged_msgs src/test/test_unitree_msgs.cpp)
-target_link_libraries(test_unitree_legged_msgs
-        ${catkin_LIBRARIES}
         )
