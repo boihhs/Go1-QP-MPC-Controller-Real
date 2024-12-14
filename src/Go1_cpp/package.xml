@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-    <name>a1_cpp</name>
+    <name>go1_cpp</name>
     <version>0.0.1</version>
-    <description>The A1 Cpp Controller</description>
+    <description>The Go1 Cpp Controller</description>
 
     <!-- One maintainer tag required, multiple allowed, one person per tag -->
     <!-- Example:  -->
