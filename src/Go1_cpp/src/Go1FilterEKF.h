@@ -6,7 +6,7 @@
 #ifndef GO1_FILTER_EKF_H
 #define GO1_FILTER_EKF_H
 
-#include "Go1Parameters.h"
+#include "Go1Params.h"
 #include "Go1ControlStates.h"
 #include "utils/Utils.h"
 
