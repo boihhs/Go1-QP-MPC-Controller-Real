@@ -25,7 +25,7 @@
 #include <Eigen/Dense>
 #include <Eigen/Core>
 
-#include "Go1Parameters.h"
+#include "Go1Params.h"
 #include "Go1ControlStates.h"
 #include "utils/Utils.h"
 #include "ConvexMpc.h"
