@@ -76,7 +76,7 @@ echo "source /root/Go1_ctrl_ws/devel/setup.bash" >> /.bashrc
 ```shell
 rosrun unitree_controller unitree_move_kinetic
 ```
-``shell
+```shell
 rosrun unitree_controller unitree_move_kinetic
 ```
 
