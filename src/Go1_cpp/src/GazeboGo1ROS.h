@@ -148,8 +148,7 @@ private:
     double motor_offset[4] = {};
     double upper_leg_length[4] = {};
     double lower_leg_length[4] = {};
-    std::vector<Eigen::VectorXd> rho_fix_list;
-    std::vector<Eigen::VectorXd> rho_opt_list;
+    
     Go1Kinematics go1_kin;
     // variables related to control
     Go1ControlStates go1_ctrl_states;
