@@ -47,7 +47,7 @@ ssh root@localhost -p2233
 ```
 
 ```shell
-cd /root/A1_ctrl_ws/
+cd /root/Go1_ctrl_ws/
 ```
 
 ```shell
@@ -55,22 +55,25 @@ catkin build
 ```
 
 ```shell
-source /root/A1_ctrl_ws/devel/setup.bash
+source /root/Go1_ctrl_ws/devel/setup.bash
 ```
 
 ```shell
-echo "source /root/A1_ctrl_ws/devel/setup.bash" >> /.bashrc
+echo "source /root/Go1_ctrl_ws/devel/setup.bash" >> /.bashrc
 ```
 
 ---
 
-### Run this command, and then pause the gazebo simulation:
+### Run these commands to make it so the robot is in default position, and then pause the gazebo simulation:
 ### This should reset the robot. Also press `Ctrl+C` so you can type another command after pausing:
 ```shell
+rosrun unitree_controller unitree_move_kinetic
+```
+``shell
 rosrun unitree_controller unitree_move_kinetic
 ```
 
 ### Run the MPC controller, and then unpause the gazebo simulation to see the control work:
 ```shell
-roslaunch a1_cpp a1_ctrl.launch type:=gazebo solver_type:=mpc
+roslaunch Go1_cpp go1_ctrl.launch type:=gazebo solver_type:=mpc
 ```
