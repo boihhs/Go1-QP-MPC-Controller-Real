@@ -252,12 +252,11 @@ void GazeboGo1ROS::gt_pose_callback(const nav_msgs::Odometry::ConstPtr &odom) {
     Eigen::MatrixXd J_rr = go1_kin.NumJac(q, &Go1Kinematics::RR_foot);
     
     // Set the jacobian to the control state
-    go1_ctrl_states.j_foot.block<3,3>(0,0) = J_fl.block<3,3>(0,0);
-    go1_ctrl_states.j_foot.block<3,3>(3,3) = J_fr.block<3,3>(0,3);
-    go1_ctrl_states.j_foot.block<3,3>(6,6) = J_rl.block<3,3>(0,6);
-    go1_ctrl_states.j_foot.block<3,3>(9,9) = J_rr.block<3,3>(0,9);
-
-
+    go1_ctrl_states.j_foot.block<3,12>(0,0) = J_fl;
+    go1_ctrl_states.j_foot.block<3,12>(3,0) = J_fr;
+    go1_ctrl_states.j_foot.block<3,12>(6,0) = J_rl;
+    go1_ctrl_states.j_foot.block<3,12>(9,0) = J_rr;
+    
 
     for (int i = 0; i < NUM_LEG; ++i) {
         Eigen::Matrix3d tmp_mtx = go1_ctrl_states.j_foot.block<3, 3>(3 * i, 3 * i);
