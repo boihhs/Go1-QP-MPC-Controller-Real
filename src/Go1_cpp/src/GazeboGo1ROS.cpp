@@ -1,5 +1,6 @@
 //
 // Created by zixin on 11/1/21.
+// Modified by Google Gemini Flash 2.0 on 12/14/2024
 //
 
 #include "GazeboGo1ROS.h"
@@ -88,15 +89,6 @@ GazeboGo1ROS::GazeboGo1ROS(ros::NodeHandle &_nh) {
     upper_leg_length[0] = upper_leg_length[1] = upper_leg_length[2] = upper_leg_length[3] = 0.21;
     lower_leg_length[0] = lower_leg_length[1] = lower_leg_length[2] = lower_leg_length[3] = LOWER_LEG_LENGTH;
 
-    for (int i = 0; i < NUM_LEG; i++) {
-        Eigen::VectorXd rho_fix(5);
-        rho_fix << leg_offset_x[i], leg_offset_y[i], motor_offset[i], upper_leg_length[i], lower_leg_length[i];
-        Eigen::VectorXd rho_opt(3);
-        rho_opt << 0.0, 0.0, 0.0;
-        rho_fix_list.push_back(rho_fix);
-        rho_opt_list.push_back(rho_opt);
-    }
-
     acc_x = MovingWindowFilter(5);
     acc_y = MovingWindowFilter(5);
     acc_z = MovingWindowFilter(5);
@@ -129,13 +121,6 @@ bool GazeboGo1ROS::main_update(double t, double dt) {
         joy_cmd_body_height = JOY_CMD_BODY_HEIGHT_MIN;
     }
 
-//    joy_cmd_body_height += joy_cmd_velz * dt;
-//    if (joy_cmd_body_height >= JOY_CMD_BODY_HEIGHT_MAX + go1_ctrl_states.walking_surface_height) {
-//        joy_cmd_body_height = JOY_CMD_BODY_HEIGHT_MAX + go1_ctrl_states.walking_surface_height;
-//    }
-//    if (joy_cmd_body_height <= JOY_CMD_BODY_HEIGHT_MIN + go1_ctrl_states.walking_surface_height) {
-//        joy_cmd_body_height = JOY_CMD_BODY_HEIGHT_MIN + go1_ctrl_states.walking_surface_height;
-//    }
 
     prev_joy_cmd_ctrl_state = joy_cmd_ctrl_state;
 
@@ -238,20 +223,6 @@ void GazeboGo1ROS::gt_pose_callback(const nav_msgs::Odometry::ConstPtr &odom) {
                                                   odom->pose.pose.orientation.x,
                                                   odom->pose.pose.orientation.y,
                                                   odom->pose.pose.orientation.z);                                              
-    // go1_ctrl_states.root_pos << odom->pose.pose.position.x,
-    //         odom->pose.pose.position.y,
-    //         odom->pose.pose.position.z;
-    // // make sure root_lin_vel is in world frame
-    // go1_ctrl_states.root_lin_vel << odom->twist.twist.linear.x,
-    //         odom->twist.twist.linear.y,
-    //         odom->twist.twist.linear.z;
-
-    // make sure root_ang_vel is in world frame
-    // go1_ctrl_states.root_ang_vel << odom->twist.twist.angular.x,
-    //         odom->twist.twist.angular.y,
-    //         odom->twist.twist.angular.z;
-
-
 
     // calculate several useful variables
     // euler should be roll pitch yaw
@@ -262,13 +233,33 @@ void GazeboGo1ROS::gt_pose_callback(const nav_msgs::Odometry::ConstPtr &odom) {
     go1_ctrl_states.root_rot_mat_z = Eigen::AngleAxisd(yaw_angle, Eigen::Vector3d::UnitZ());
 
     // FL, FR, RL, RR
+    // the joint position in q vector is hr, hp, kp... for each leg
+    Eigen::VectorXd q(12);
+        for(int i = 0; i < 12; i++){
+            q[i] = go1_ctrl_states.joint_pos[i];
+        }
+
+
+    go1_ctrl_states.foot_pos_rel.block<3, 1>(0, 0) = go1_kin.FL_foot(q);
+    go1_ctrl_states.foot_pos_rel.block<3, 1>(0, 1) = go1_kin.FR_foot(q);
+    go1_ctrl_states.foot_pos_rel.block<3, 1>(0, 2) = go1_kin.RL_foot(q);
+    go1_ctrl_states.foot_pos_rel.block<3, 1>(0, 3) = go1_kin.RR_foot(q);
+    
+    // Calculate numerical jacobians and set to go1_ctrl_states
+    Eigen::MatrixXd J_fl = go1_kin.NumJac(q, &Go1Kinematics::FL_foot);
+    Eigen::MatrixXd J_fr = go1_kin.NumJac(q, &Go1Kinematics::FR_foot);
+    Eigen::MatrixXd J_rl = go1_kin.NumJac(q, &Go1Kinematics::RL_foot);
+    Eigen::MatrixXd J_rr = go1_kin.NumJac(q, &Go1Kinematics::RR_foot);
+    
+    // Set the jacobian to the control state
+    go1_ctrl_states.j_foot.block<3,3>(0,0) = J_fl.block<3,3>(0,0);
+    go1_ctrl_states.j_foot.block<3,3>(3,3) = J_fr.block<3,3>(0,3);
+    go1_ctrl_states.j_foot.block<3,3>(6,6) = J_rl.block<3,3>(0,6);
+    go1_ctrl_states.j_foot.block<3,3>(9,9) = J_rr.block<3,3>(0,9);
+
+
+
     for (int i = 0; i < NUM_LEG; ++i) {
-        go1_ctrl_states.foot_pos_rel.block<3, 1>(0, i) = go1_kin.fk(
-                go1_ctrl_states.joint_pos.segment<3>(3 * i),
-                rho_opt_list[i], rho_fix_list[i]);
-        go1_ctrl_states.j_foot.block<3, 3>(3 * i, 3 * i) = go1_kin.jac(
-                go1_ctrl_states.joint_pos.segment<3>(3 * i),
-                rho_opt_list[i], rho_fix_list[i]);
         Eigen::Matrix3d tmp_mtx = go1_ctrl_states.j_foot.block<3, 3>(3 * i, 3 * i);
         Eigen::Vector3d tmp_vec = go1_ctrl_states.joint_vel.segment<3>(3 * i);
         go1_ctrl_states.foot_vel_rel.block<3, 1>(0, i) = tmp_mtx * tmp_vec;
