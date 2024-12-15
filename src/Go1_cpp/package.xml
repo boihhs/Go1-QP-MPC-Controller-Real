@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-    <name>go1_cpp</name>
+    <name>Go1_cpp</name>
     <version>0.0.1</version>
     <description>The Go1 Cpp Controller</description>
 
