@@ -1,3 +1,5 @@
+## Install https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html to use GPU
+
 ## To build Docker run:
 
 ```shell
@@ -9,13 +11,18 @@ sudo docker build -t name_of_thing .
 ```
 
 ```shell
-sudo docker run -it --rm \
-    -p 2233:2233 \
-    --env="DISPLAY=$DISPLAY" \
-    --env="XDG_SESSION_TYPE=$XDG_SESSION_TYPE" \
-    --env="QT_X11_NO_MITSHM=1" \
-    --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" \
-    name_of_thing /bin/bash
+sudo docker run -it 	
+--env="DISPLAY=$DISPLAY" 	
+--env="QT_X11_NO_MITSHM=1" 	
+--volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" 	
+--env="XAUTHORITY=$XAUTH" 	
+--volume="$XAUTH:$XAUTH" 	
+--runtime=nvidia 	
+--privileged 	
+--network host 	
+--name $name$ 	
+$name$
+
 ```
 
 ### After running this, gazebo should pop up:
@@ -32,7 +39,7 @@ roslaunch unitree_gazebo normal.launch rname:=a1 wname:=stairs_single
 sudo docker ps
 ```
 
-### Run the Docker thing in this terminal:
+### Run the Docker thing in this terminal (you might be able to replace $CONTAINER_ID$ with $name$, skipping the previous step:
 ```shell
 sudo docker exec -it $CONTAINER_ID$ bash
 ```
@@ -75,5 +82,5 @@ rosrun unitree_controller unitree_move_kinetic
 
 ### Run the MPC controller, and then unpause the gazebo simulation to see the control work:
 ```shell
-roslaunch Go1_cpp go1_ctrl.launch type:=gazebo solver_type:=mpc
+roslaunch Go1_cpp go1_ctrl.launch type:=gazebo solver_type:=qp
 ```
