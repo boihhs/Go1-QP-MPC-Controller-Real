@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10.1)
-project(go1_cpp)
+project(Go1_cpp)
 set(CMAKE_BUILD_TYPE "Release")
 #set(CMAKE_BUILD_TYPE "Debug")
 set(CMAKE_CXX_STANDARD 14)
