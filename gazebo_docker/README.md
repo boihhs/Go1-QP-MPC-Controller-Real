@@ -27,7 +27,7 @@ $name$
 
 ### After running this, gazebo should pop up:
 ```shell
-roslaunch unitree_gazebo normal.launch rname:=a1 wname:=stairs_single
+roslaunch unitree_gazebo normal.launch rname:=go1 wname:=stairs_single
 ```
 
 ---
@@ -82,5 +82,5 @@ rosrun unitree_controller unitree_move_kinetic
 
 ### Run the MPC controller, and then unpause the gazebo simulation to see the control work:
 ```shell
-roslaunch Go1_cpp go1_ctrl.launch type:=gazebo solver_type:=qp
+roslaunch Go1_cpp go1_ctrl.launch type:=gazebo solver_type:=mpc
 ```
