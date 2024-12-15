@@ -10,7 +10,7 @@
 #include <Eigen/Dense>
 #include <ros/ros.h>
 
-#include "Go1Params.h"
+#include "Go1Parameters.h"
 
 class Go1ControlStates {
 public:
@@ -103,7 +103,7 @@ public:
         foot_vel_world.setZero();
         foot_vel_abs.setZero();
         foot_vel_rel.setZero();
-        j_foot = Eigen::MatrixXd::Zero(12,12);
+        j_foot.setIdentity();
 
         for (int i = 0; i < NUM_LEG; ++i) {
             contacts[i] = false;
@@ -444,7 +444,7 @@ public:
     Eigen::Matrix<double, 3, NUM_LEG> foot_vel_world;
     Eigen::Matrix<double, 3, NUM_LEG> foot_vel_abs;
     Eigen::Matrix<double, 3, NUM_LEG> foot_vel_rel;
-    Eigen::MatrixXd j_foot;
+    Eigen::Matrix<double, 12, 12> j_foot;
 
     bool contacts[NUM_LEG];         // flag to decide leg in the stance/swing mode
     bool plan_contacts[NUM_LEG];    // planed flag for stance/swing mode
