@@ -103,7 +103,7 @@ public:
         foot_vel_world.setZero();
         foot_vel_abs.setZero();
         foot_vel_rel.setZero();
-        j_foot.setIdentity();
+        j_foot.setZero();
 
         for (int i = 0; i < NUM_LEG; ++i) {
             contacts[i] = false;
@@ -385,7 +385,7 @@ public:
     Eigen::Vector3d root_pos_d;
     Eigen::Vector3d root_euler_d;
     Eigen::Vector3d root_lin_vel_d;
-    Eigen::Vector3d root_lin_vel_d_world;
+     Eigen::Vector3d root_lin_vel_d_world;
     Eigen::Vector3d root_ang_vel_d;
     Eigen::Vector3d root_ang_vel_d_world;
 
