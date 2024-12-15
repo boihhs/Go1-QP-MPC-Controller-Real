@@ -15,6 +15,7 @@
 #include <thread>
 #include <condition_variable>
 #include <fstream>
+#include <vector>
 
 // ROS
 #include <ros/ros.h>
@@ -142,18 +143,18 @@ private:
     Eigen::Vector3d p_br;
     Eigen::Matrix3d R_br;
     // for each leg, there is an offset between the body frame and the hip motor (fx, fy)
-    double leg_offset_x[4] = {};
-    double leg_offset_y[4] = {};
+    double leg_offset_x[4] ;
+    double leg_offset_y[4] ;
     // for each leg, there is an offset between the body frame and the hip motor (fx, fy)
-    double motor_offset[4] = {};
-    double upper_leg_length[4] = {};
-    double lower_leg_length[4] = {};
+    double motor_offset[4] ;
+    double upper_leg_length[4] ;
+    double lower_leg_length[4] ;
     
-    Go1Kinematics go1_kin;
+    Go1Kinematics fk_jac_go1;
     // variables related to control
-    Go1ControlStates go1_ctrl_states;
+    Go1ControlStates control_states_go1;
     Go1RobotControl _root_control;
-    Go1FilterEKF go1_estimate;
+    Go1FilterEKF estimates_go1;
 
     // filters
     MovingWindowFilter acc_x;
@@ -166,6 +167,10 @@ private:
     MovingWindowFilter quat_x;
     MovingWindowFilter quat_y;
     MovingWindowFilter quat_z;
+
+    std::vector<Eigen::VectorXd> rho_fix_list;
+    std::vector<Eigen::VectorXd> rho_opt_list;
+
 };
 
 
