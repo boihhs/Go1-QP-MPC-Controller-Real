@@ -74,7 +74,7 @@ echo "source /root/Go1_ctrl_ws/devel/setup.bash" >> /.bashrc
 ### Run these commands to make it so the robot is in default position, and then pause the gazebo simulation:
 ### This should reset the robot. Also press `Ctrl+C` so you can type another command after pausing:
 ```shell
-rosrun unitree_controller unitree_move_kinetic
+rosrun unitree_controller unitree_servo
 ```
 ```shell
 rosrun unitree_controller unitree_move_kinetic
