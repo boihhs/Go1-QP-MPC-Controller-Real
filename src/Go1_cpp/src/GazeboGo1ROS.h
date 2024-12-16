@@ -152,7 +152,7 @@ private:
     
     Go1Kinematics fk_jac_go1;
     // variables related to control
-    Go1ControlStates control_states_go1;
+    Go1ControlStates go1_ctrl_states;
     Go1RobotControl _root_control;
     Go1FilterEKF estimates_go1;
 
