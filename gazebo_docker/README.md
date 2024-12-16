@@ -82,5 +82,5 @@ rosrun unitree_controller unitree_move_kinetic
 
 ### Run the MPC controller, and then unpause the gazebo simulation to see the control work:
 ```shell
-roslaunch Go1_cpp go1_ctrl.launch type:=gazebo solver_type:=mpc
+roslaunch Go1_cpp go1_ctrl.launch type:=gazebo solver_type:=qp
 ```
