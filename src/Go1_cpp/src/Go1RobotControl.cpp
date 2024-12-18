@@ -56,20 +56,6 @@ Go1RobotControl::Go1RobotControl() {
         recent_contact_y_filter[i] = MovingWindowFilter(60);
         recent_contact_z_filter[i] = MovingWindowFilter(60);
     }
-// HLIP_GainComputation
-    GainsHLIP.resize(4);
-    GainsHLIP.setZero();
-    hlip_ub.resize(6);
-    hlip_ub.setZero();
-    hlip_lb.resize(6);
-    hlip_lb.setZero();
-    // hlip_hessian.resize(4,4);
-    hlip_gradient.resize(4);
-    hlip_gradient.setZero();
-    // hlip_linearConst.resize(2,4);
-    hlip_dense_hessian.setZero();
-    hlip_dense_linearConst.setZero();
-    StanceFeetMP_prev.setZero();
 
 }
 
@@ -186,196 +172,7 @@ void Go1RobotControl::update_plan(Go1ControlStates &state, double dt) {
     Eigen::Vector3d lin_vel_world = state.root_lin_vel; // world frame linear velocity
     Eigen::Vector3d lin_vel_rel = state.root_rot_mat_z.transpose() * lin_vel_world; // robot body frame linear velocity
 
-    // Raibert Heuristic, calculate foothold position
-    //ToDo add the H-LIP based foothold planner: delta_x and delta_y are the step lengths in x and y directions
     state.foot_pos_target_rel = state.default_foot_pos;
-    //state.foot_pos_target_rel(2) = -state.root_pos_d (2);
-
- 
-    ////////////////////////////////////////////////
-    // Eigen::Vector2d StanceFeetSumXY;
-    // Eigen::Vector2d StanceFeetMP, StanceFeetMP_prev;
-    // Eigen::Vector2d rel_error_pos;
-    // Eigen::Vector2d rel_error_vel;
-    // Eigen::Vector2d u_ref;
-    double swing_progress_pram = 0.0;
-    StanceFeetSumXY.setZero();
-    int temp=0;
-    for (int i = 0; i < NUM_LEG; ++i) {
-        double is_stance = state.contacts[i] ? 1.0 : 0.0;
-        StanceFeetSumXY += is_stance* state.foot_pos_rel.block<2, 1>(0, i);
-        double is_swing = state.contacts[i] ? 0.0 : 1.0;
-        if (is_swing){
-        swing_progress_pram +=  float(state.gait_counter(i) - state.counter_per_swing) / float(state.counter_per_swing); //ranges between 0 to 2
-        temp+=1;
-        }
-    }
-    /// Added this to ensure update only during 2 feet contact
-    x_footprint_default = state.default_foot_pos.row(0).segment(0, state.default_foot_pos.cols());
-    y_footprint_default = state.default_foot_pos.row(1).segment(0, state.default_foot_pos.cols());
-    x_footprint_offset = 0.25*x_footprint_default.sum();
-    y_footprint_offset = 0.25*y_footprint_default.sum();
-    std:: cout << "StanceFeetSumXY : " << StanceFeetSumXY <<  "state.foot_pos_rel : " << state.foot_pos_rel << "x_footprint_offset : " << x_footprint_offset << "y_footprint_offset : " << y_footprint_offset << std::endl;
-
-    if ( temp == 2 ){
-        StanceFeetMP = StanceFeetSumXY/2.0;
-        StanceFeetMP_prev = StanceFeetMP;
-        } else {
-            StanceFeetMP = StanceFeetMP_prev;
-            std:: cout << " ElseStanceFeetMP : " << StanceFeetMP << std::endl;
-        }
-    std:: cout << " StanceFeetMP : " << StanceFeetMP << std::endl;
-
-    rel_error_pos = state.root_lin_vel_d.segment<2>(0)*state.control_dt*state.counter_per_swing*(1.0-swing_progress_pram)/2.0 -StanceFeetSumXY; //vd*Dtau/2
-
-    Eigen::Vector3d rootVelRobotframe;
-    rootVelRobotframe = state.root_rot_mat_z.transpose() * state.root_lin_vel; // currentVelocityRobotFrame Used for computing current HLIPState as well
-    rel_error_vel = rootVelRobotframe.segment<2>(0) - state.root_lin_vel_d.segment<2>(0);
-    u_ref = state.root_lin_vel_d.segment<2>(0)*state.control_dt*state.counter_per_swing;
-   /////////////////
-    double a_ver_plus_g;
-    double f_M;
-    filter_z_imu_acceleration = MovingWindowFilter(5);
-    a_ver_plus_g = filter_z_imu_acceleration.CalculateAverage((state.imu_acc_abs(2)));
-    std::cout<< "state.imu_acc_abs(2) : " << state.imu_acc_abs(2) << "a_ver_plus_g : " << a_ver_plus_g << " state.root_pos_d (2): " << state.root_pos_d (2)<<std::endl;
-
-    if (state.imu_acc_abs(2)>0){
-        f_M = state.imu_acc_abs(2) / state.root_pos_d (2);
-    } 
-    if(state.imu_acc_abs(2)>15.0){
-        f_M = 15.0 / state.root_pos_d(2);
-    }
-    if(state.imu_acc_abs(2)< 5.0){
-        f_M =25.0;
-    }
-        
-        double a1= cosh(state.control_dt*state.counter_per_swing*sqrt(f_M));
-        double a2= sinh(state.control_dt*state.counter_per_swing*sqrt(f_M))/sqrt(f_M);
-        double a3= sinh(state.control_dt*state.counter_per_swing*sqrt(f_M))*sqrt(f_M);
-        double a4= cosh(state.control_dt*state.counter_per_swing*sqrt(f_M));
-        //
-        double a1r= cosh((1.0-0.5*swing_progress_pram)*state.control_dt*state.counter_per_swing*sqrt(f_M)); // 0.5 because swing_progress_pram is averaged for the nominally 2 swinging legs
-        double a2r= sinh((1.0-0.5*swing_progress_pram)*state.control_dt*state.counter_per_swing*sqrt(f_M))/sqrt(f_M);
-        double a3r= sinh((1.0-0.5*swing_progress_pram)*state.control_dt*state.counter_per_swing*sqrt(f_M))*sqrt(f_M);
-        double a4r= cosh((1.0-0.5*swing_progress_pram)*state.control_dt*state.counter_per_swing*sqrt(f_M));
-
-        std::cout << "f_M : " << f_M << "state.control_dt : " << state.control_dt << "a1 : " << a1<< std:: endl;
-    Phi_rem << a1r, a2r, 
-                a3r, a4r; //STM for remainingTime in swing
-
-    // hlip state
-
-        X_hlip << -StanceFeetMP(0)-x_footprint_offset, rootVelRobotframe(0);
-        Y_hlip << -StanceFeetMP(1)-y_footprint_offset, rootVelRobotframe(1);
-        X_hlip_ref_minus << state.root_lin_vel_d(0)*state.control_dt*state.counter_per_swing/2.0, state.root_lin_vel_d(0); //
-        Y_hlip_ref_minus << state.root_lin_vel_d(1)*state.control_dt*state.counter_per_swing/2.0, state.root_lin_vel_d(1); //
-
-        X_hlip_minus = Phi_rem*X_hlip;
-        Y_hlip_minus = Phi_rem*Y_hlip;
-        X_hlip_error_minus = X_hlip_minus - X_hlip_ref_minus;
-        Y_hlip_error_minus = Y_hlip_minus - Y_hlip_ref_minus;
-
-    
-    // e<< root
-    for (int i=0; i<4; ++i){
-        hlip_dense_hessian(i,i) = 2.0*(a1*a1+a3*a3);
-
-        hlip_dense_linearConst(i+2,i) =1.0;
-    }
-
-    hlip_gradient << -2*(a1*a1+a3*a3), -2*(a1*a2+a3*a4),-2*(a1*a1+a3*a3), -2*(a1*a2+a3*a4);
-
-    // dense_hlip_linearConst << rel_error_pos(0), rel_error_vel(0),
-    //                 rel_error_pos(1), rel_error_vel(1);
-
-    hlip_dense_linearConst(0,0) = X_hlip_error_minus(0);
-    hlip_dense_linearConst(0,1) = X_hlip_error_minus(1);
-    hlip_dense_linearConst(1,2) = Y_hlip_error_minus(0);
-    hlip_dense_linearConst(1,3) = Y_hlip_error_minus(1);
-
-
-    hlip_lb << -FOOT_DELTA_X_LIMIT - u_ref(0), -FOOT_DELTA_Y_LIMIT - u_ref(1), 0.5, 0.0, 0.5, 0.0;
-    hlip_ub << FOOT_DELTA_X_LIMIT + u_ref(0), FOOT_DELTA_Y_LIMIT + u_ref(1), 1.5, 0.5, 1.5, 0.5;
-
-    hlip_hessian = hlip_dense_hessian.sparseView();
-    hlip_linearConst = hlip_dense_linearConst.sparseView();
-
-           // instantiate the solver
-        OsqpEigen::Solver solver_hlip;
-        // settings
-        solver_hlip.settings()->setVerbosity(false);
-        solver_hlip.settings()->setWarmStart(false);
-        solver_hlip.data()->setNumberOfVariables(4);
-        solver_hlip.data()->setNumberOfConstraints(6);
-        solver_hlip.data()->setLinearConstraintsMatrix(hlip_linearConst);
-        solver_hlip.data()->setHessianMatrix(hlip_hessian);
-        solver_hlip.data()->setGradient(hlip_gradient);
-        solver_hlip.data()->setLowerBound(hlip_lb);
-        solver_hlip.data()->setUpperBound(hlip_ub);
-        auto t1 = std::chrono::high_resolution_clock::now();
-        solver_hlip.initSolver();
-        auto t2 = std::chrono::high_resolution_clock::now();
-        solver_hlip.solve();
-        auto t3 = std::chrono::high_resolution_clock::now();
-
-        std::chrono::duration<double, std::milli> ms_double_1 = t2 - t1;
-        std::chrono::duration<double, std::milli> ms_double_2 = t3 - t2;
-
-        // std::cout<< "Phi_rem : "<< Phi_rem << "X_hlip : " << X_hlip << "hlip_lb : " << hlip_lb << "hlip_ub : "<< hlip_ub << " hlip_dense_linearConst : " << hlip_dense_linearConst << std::endl;
-        // std::cout << "HLIP qp solver initialization time: " << ms_double_1.count() << "ms; HLIP qp solve time: " << ms_double_2.count() << "ms" << std::endl;
-
-        GainsHLIP = solver_hlip.getSolution(); //4x1
-        for (int i = 0; i < 4; ++i) {
-            if (!isnan(GainsHLIP[i]))
-                state.HLIP_Gains[i] = GainsHLIP[i];
-                state.HLIP_Gains << 1.0, 0.18, 1.0, 0.18;
-            }
-
-        std::cout << "HLIP Gains : " << state.HLIP_Gains << std:: endl;
-        ///
-        // StepLength = Vd_rf*DeltaTau +K.segment<2>(0)*(Phi_rem*X_hlip)- X_hlip_ref_minus)
-        /*
-        double stepLengthX = state.root_lin_vel_d(0)*state.control_dt*state.counter_per_swing + (state.HLIP_Gains.segment<2>(0).dot(X_hlip_error_minus));
-        double stepLengthY = state.root_lin_vel_d(1)*state.control_dt*state.counter_per_swing + (state.HLIP_Gains.segment<2>(2).dot(Y_hlip_error_minus));
-
-        // std::cout << "stepLengthX: " << stepLengthX << " stepLengthY : " << stepLengthY << "X_hlip_minus : "<< X_hlip_minus <<"X_hlip_ref_minus : " << X_hlip_ref_minus << std:: endl;
-
-        // Uncomment to try HLIP-based Planning
-
-        for (int i = 0; i < NUM_LEG; ++i) {
-
-            if (stepLengthX < -FOOT_DELTA_X_LIMIT) {
-                stepLengthX = -FOOT_DELTA_X_LIMIT;
-            }
-            if (stepLengthX > FOOT_DELTA_X_LIMIT) {
-                stepLengthX = FOOT_DELTA_X_LIMIT;
-            }
-            if (stepLengthY < -FOOT_DELTA_Y_LIMIT) {
-                stepLengthY = -FOOT_DELTA_Y_LIMIT;
-            }
-            if (stepLengthY > FOOT_DELTA_Y_LIMIT) {
-                stepLengthY = FOOT_DELTA_Y_LIMIT;
-            }
-
-        state.foot_pos_target_rel(0, i) += stepLengthX;
-        state.foot_pos_target_rel(1, i) += stepLengthY;
-        std::cout << "stepLengthX : " << stepLengthX << " stepLengthY : " << stepLengthY << std::endl;
-
-        state.foot_pos_target_abs.block<3, 1>(0, i) = state.root_rot_mat * state.foot_pos_target_rel.block<3, 1>(0, i);
-        state.foot_pos_target_world.block<3, 1>(0, i) = state.foot_pos_target_abs.block<3, 1>(0, i) + state.root_pos;
-        //  std::cout << "FeetNo = " << i << " Dx = " << delta_x <<" Dy = " << delta_y << "FeetTargetRel = "<<  state.foot_pos_target_rel.block<3, 1>(0, i) << "FeetTargetWorld_Abs = "<<  state.foot_pos_target_world.block<3, 1>(0, i)<< state.foot_pos_target_abs.block<3, 1>(0, i)<< std::endl;
-    
-    }
-    */
-
-
- 
-    ////////////////////////////////////////////////
-
-
-    ///////////////////////////////////////////
-    // Uncomment to try RaibertHeuresticBasedPlanning
-    
     for (int i = 0; i < NUM_LEG; ++i) {
         double delta_x =
                 std::sqrt(std::abs(state.default_foot_pos(2)) / 9.8) * (lin_vel_rel(0) - state.root_lin_vel_d(0)) +
@@ -632,8 +429,8 @@ Eigen::Matrix<double, 3, NUM_LEG> Go1RobotControl::compute_grf(Go1ControlStates 
         hessian = dense_hessian.sparseView();
         // accidentally wrote this as -2* before. Huge problem
 
-        // gradient.block<3 * NUM_LEG, 1>(0, 0) = -inertia_inv.transpose() * Q * root_acc;
-        gradient.block<3 * NUM_LEG, 1>(0, 0) = -inertia_inv.transpose() * Q * desired_inertial_force;
+        gradient.block<3 * NUM_LEG, 1>(0, 0) = -inertia_inv.transpose() * Q * root_acc;
+        // gradient.block<3 * NUM_LEG, 1>(0, 0) = -inertia_inv.transpose() * Q * desired_inertial_force;
 
         // adjust bounds according to contact flag
         for (int i = 0; i < NUM_LEG; ++i) {
