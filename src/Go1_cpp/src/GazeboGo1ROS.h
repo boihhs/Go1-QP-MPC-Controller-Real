@@ -107,6 +107,22 @@ private:
     ros::Publisher pub_euler_d;
 
     //  0 is standing, 1 is walking
+    // joystick command
+    double joy_cmd_velx = 0.0;
+    double joy_cmd_velx_forward = 0.0;
+    double joy_cmd_velx_backward = 0.0;
+    double joy_cmd_vely = 0.0;
+    double joy_cmd_velz = 0.0;
+
+    double joy_cmd_pitch_rate = 0.0;
+    double joy_cmd_roll_rate = 0.0;
+    double joy_cmd_yaw_rate = 0.0;
+
+    double joy_cmd_pitch_ang = 0.0;
+    double joy_cmd_roll_ang = 0.0;
+    double joy_cmd_body_height = 0.3;
+
+    //  0 is standing, 1 is walking
     int joy_cmd_ctrl_state = 0;
     bool joy_cmd_ctrl_state_change_request = false;
     int prev_joy_cmd_ctrl_state = 0;
