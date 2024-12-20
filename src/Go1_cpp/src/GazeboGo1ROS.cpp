@@ -253,7 +253,7 @@ void GazeboGo1ROS::gt_pose_callback(const nav_msgs::Odometry::ConstPtr &odom) {
     go1_ctrl_states.foot_vel_rel = mat_map; 
 
     
-    std::cout << "Size check; Row = " <<  go1_ctrl_states.j_foot.rows()<<" Col =" << go1_ctrl_states.j_foot.cols()<< " Vector =" << go1_ctrl_states.joint_vel.size() << std::endl;
+    // std::cout << "Size check; Row = " <<  go1_ctrl_states.j_foot.rows()<<" Col =" << go1_ctrl_states.j_foot.cols()<< " Vector =" << go1_ctrl_states.joint_vel.size() << std::endl;
 
     go1_ctrl_states.foot_pos_abs = go1_ctrl_states.root_rot_mat * go1_ctrl_states.foot_pos_rel; //
 
@@ -345,6 +345,10 @@ void GazeboGo1ROS::RR_thigh_state_callback(const unitree_legged_msgs::MotorState
 void GazeboGo1ROS::RR_calf_state_callback(const unitree_legged_msgs::MotorState &go1_joint_state) {
     go1_ctrl_states.joint_pos[11] = go1_joint_state.q;
     go1_ctrl_states.joint_vel[11] = go1_joint_state.dq;
+    // lowState.motorState[8].mode = go1_joint_state.mode; // Not used in current file1
+    // lowState.motorState[8].q = go1_joint_state.q; // Not used in current file1
+    // lowState.motorState[8].dq = go1_joint_state.dq; // Not used in current file1
+    // lowState.motorState[8].tauEst = go1_joint_state.tauEst; // Not used in current file1
 }
 
 // foot contact force
