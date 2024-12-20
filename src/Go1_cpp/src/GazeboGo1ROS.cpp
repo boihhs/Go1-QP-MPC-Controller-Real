@@ -235,7 +235,7 @@ void GazeboGo1ROS::gt_pose_callback(const nav_msgs::Odometry::ConstPtr &odom) {
 
     // Go1 foot position in Base coordinate system    
     go1_ctrl_states.foot_pos_rel.block<3, 1>(0, 0)= fk_jac_go1.FR_foot(go1_ctrl_states.joint_pos); // Relative to base coordinatesystem
-    std::cout << go1_ctrl_states.foot_pos_rel.block<3, 1>(0, 0);
+    
     go1_ctrl_states.foot_pos_rel.block<3, 1>(0, 1)= fk_jac_go1.FL_foot(go1_ctrl_states.joint_pos); //
     go1_ctrl_states.foot_pos_rel.block<3, 1>(0, 2)= fk_jac_go1.RR_foot(go1_ctrl_states.joint_pos); //
     go1_ctrl_states.foot_pos_rel.block<3, 1>(0, 3)= fk_jac_go1.RL_foot(go1_ctrl_states.joint_pos); //
@@ -253,7 +253,7 @@ void GazeboGo1ROS::gt_pose_callback(const nav_msgs::Odometry::ConstPtr &odom) {
     go1_ctrl_states.foot_vel_rel = mat_map; 
 
     
-    // std::cout << "Size check; Row = " <<  go1_ctrl_states.j_foot.rows()<<" Col =" << go1_ctrl_states.j_foot.cols()<< " Vector =" << go1_ctrl_states.joint_vel.size() << std::endl;
+    std::cout << "Size check; Row = " <<  go1_ctrl_states.j_foot.rows()<<" Col =" << go1_ctrl_states.j_foot.cols()<< " Vector =" << go1_ctrl_states.joint_vel.size() << std::endl;
 
     go1_ctrl_states.foot_pos_abs = go1_ctrl_states.root_rot_mat * go1_ctrl_states.foot_pos_rel; //
 
