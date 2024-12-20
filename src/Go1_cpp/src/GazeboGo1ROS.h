@@ -106,30 +106,6 @@ private:
     ros::Subscriber sub_joint_msg[12];
     ros::Publisher pub_euler_d;
 
-    // 0, 1, 2, 3: FL, FR, RL, RR
-    ros::Subscriber sub_foot_contact_msg[4];
-    ros::Subscriber sub_gt_pose_msg;
-    ros::Subscriber sub_imu_msg;
-    ros::Subscriber sub_joy_msg;
-
-    // debug estimation
-    ros::Publisher pub_estimated_pose;
-
-    // joystick command
-    double joy_cmd_velx = 0.0;
-    double joy_cmd_velx_forward = 0.0;
-    double joy_cmd_velx_backward = 0.0;
-    double joy_cmd_vely = 0.0;
-    double joy_cmd_velz = 0.0;
-
-    double joy_cmd_pitch_rate = 0.0;
-    double joy_cmd_roll_rate = 0.0;
-    double joy_cmd_yaw_rate = 0.0;
-
-    double joy_cmd_pitch_ang = 0.0;
-    double joy_cmd_roll_ang = 0.0;
-    double joy_cmd_body_height = 0.3;
-
     //  0 is standing, 1 is walking
     int joy_cmd_ctrl_state = 0;
     bool joy_cmd_ctrl_state_change_request = false;
